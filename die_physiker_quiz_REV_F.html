@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Die Physiker – Quiz (50 komplexe Inhaltsfragen)</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #121924;
+    --panel2: #0f1620;
+    --text: #e6edf3;
+    --muted: #9fb0c0;
+    --accent: #8bd3ff;
+    --good: #63e6be;
+    --bad: #ff6b6b;
+    --warn: #ffd43b;
+    --border: rgba(255,255,255,.10);
+    --shadow: 0 14px 40px rgba(0,0,0,.45);
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    background: radial-gradient(1200px 600px at 20% 0%, rgba(139,211,255,.18), transparent 60%),
+                radial-gradient(1200px 700px at 90% 10%, rgba(99,230,190,.10), transparent 65%),
+                var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
+  header { display:flex; gap:16px; align-items:flex-start; justify-content:space-between; margin-bottom:16px; }
+  .title { display:grid; gap:6px; }
+  h1 { margin:0; font-size:22px; letter-spacing:.2px; }
+  .sub { color:var(--muted); font-size:13px; }
+  .pill { display:inline-flex; gap:8px; align-items:center; padding:8px 10px; border:1px solid var(--border); background: rgba(18,25,36,.7); border-radius:999px; color:var(--muted); font-size:12px; white-space:nowrap; }
+  .panel { background: linear-gradient(180deg, rgba(18,25,36,.92), rgba(15,22,32,.92)); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  .topbar { padding:14px 14px 12px; border-bottom:1px solid var(--border); display:grid; gap:10px; }
+  .progressRow { display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .progressText { font-size:13px; color:var(--muted); }
+  .bar { height:10px; background: rgba(255,255,255,.08); border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,.06); }
+  .bar > div { height:100%; width:0%; background: linear-gradient(90deg, rgba(139,211,255,.9), rgba(99,230,190,.9)); }
+  .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end; }
+  button { cursor:pointer; border:1px solid var(--border); background: rgba(255,255,255,.06); color:var(--text); padding:10px 12px; border-radius:12px; font-weight:650; letter-spacing:.1px; }
+  button:hover { background: rgba(255,255,255,.09); }
+  button:active { transform: translateY(1px); }
+  .btnPrimary { border-color: rgba(139,211,255,.35); background: rgba(139,211,255,.12); }
+  .btnDanger { border-color: rgba(255,107,107,.35); background: rgba(255,107,107,.10); }
+  .content { padding:18px 16px 16px; }
+  .qmeta { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .tag { font-size:12px; color:var(--muted); border:1px solid var(--border); padding:5px 10px; border-radius:999px; background: rgba(0,0,0,.12); }
+  .attempts { font-size:12px; color:var(--muted); }
+  .prompt { font-size:16px; margin:8px 0 14px; }
+  .options { display:grid; gap:10px; margin:12px 0 12px; }
+  .opt { display:flex; gap:10px; align-items:flex-start; border:1px solid var(--border); background: rgba(0,0,0,.10); padding:10px 12px; border-radius:14px; }
+  .opt input { margin-top:3px; transform: scale(1.1); }
+  textarea { width:100%; min-height:140px; resize:vertical; border-radius:14px; border:1px solid var(--border); background: rgba(0,0,0,.14); color:var(--text); padding:12px; outline:none; font-size:14px; }
+  textarea:focus { border-color: rgba(139,211,255,.45); box-shadow: 0 0 0 4px rgba(139,211,255,.10); }
+  .actionRow { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-top:14px; }
+  .leftActions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .rightActions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end; }
+  .note { color:var(--muted); font-size:12px; }
+  .divider { height:1px; background: var(--border); margin:14px 0; }
+  .hintBox, .modelBox { border:1px dashed rgba(255,255,255,.20); border-radius:14px; padding:10px 12px; background: rgba(255,255,255,.04); margin-top:12px; }
+  .hintTitle { display:flex; gap:8px; align-items:center; font-weight:750; color:var(--warn); margin-bottom:6px; font-size:13px; }
+  .modelTitle { display:flex; gap:8px; align-items:center; font-weight:750; color:var(--accent); margin-bottom:6px; font-size:13px; }
+  .overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; padding:16px; background: rgba(0,0,0,.55); backdrop-filter: blur(3px); z-index:50; }
+  .overlay.show { display:flex; }
+  .toast { width:min(720px, 100%); border-radius:18px; border:1px solid var(--border); background: linear-gradient(180deg, rgba(18,25,36,.96), rgba(12,17,26,.96)); box-shadow: var(--shadow); padding:14px 14px 12px; display:grid; gap:10px; }
+  .toastTop { display:flex; gap:12px; align-items:center; justify-content:space-between; }
+  .badge { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:800; letter-spacing:.2px; border:1px solid var(--border); }
+  .badge.good { color: rgba(99,230,190,1); background: rgba(99,230,190,.10); border-color: rgba(99,230,190,.25); }
+  .badge.bad { color: rgba(255,107,107,1); background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.25); }
+  .toastText { color: var(--text); font-size:14px; }
+  .toastSmall { color: var(--muted); font-size:12px; }
+  .footer { margin-top:10px; color: var(--muted); font-size:12px; display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap; }
+  .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+         font-size:11px; padding:2px 6px; border-radius:8px; border:1px solid var(--border); background: rgba(0,0,0,.2); }
+
+/* =========================
+   CHANGE 2026-01-04 (REV D)
+   GIF BACKGROUND – STABLE VERSION
+   - GIF is a real <img>, NOT background-image
+   - Guarantees animation start when linked / embedded
+   ========================= */
+
+.panel{
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated GIF layer */
+.panel-bg-gif{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+
+  /* Visual tuning: recognisable but readable */
+  filter: blur(6px) brightness(.65) contrast(1.15);
+  transform: scale(1.04);
+
+  /* Force browser GIF decoding */
+  image-rendering: auto;
+}
+
+/* Darkening + contrast overlay */
+.panel::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(1200px 700px at 50% 40%, rgba(0,0,0,.15), rgba(0,0,0,.55)),
+    linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.55));
+}
+
+/* All panel content above GIF */
+.panel > *:not(.panel-bg-gif){
+  position: relative;
+  z-index: 2;
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title">
+      <h1>Die Physiker – Quiz (50 komplexe Inhaltsfragen)</h1>
+      <div class="sub">10 Multiple Choice · 40 Freitext · Sofortkorrektur (1× „Falsch“, 2× „Falsch + Hinweis“, 3× Musterantwort → weiter)</div>
+    </div>
+    <div class="pill" id="sessionPill">Session: nicht gestartet</div>
+  </header>
+
+  <div class="panel">
+    <!-- =========================
+         CHANGE 2026-01-04 (REV D)
+         Animated GIF background as REAL <img>
+         Ensures animation starts when page is linked/embedded
+         ========================= -->
+    <img class="panel-bg-gif" src="AlteDame.gif" alt="" />
+
+    <div class="topbar">
+      <div class="progressRow">
+        <div class="progressText" id="progressText">Bereit.</div>
+        <div class="controls">
+          <button class="btnPrimary" id="btnStart">Start / Fortsetzen</button>
+          <button id="btnExport">Export (JSON)</button>
+          <button class="btnDanger" id="btnReset">Reset</button>
+        </div>
+      </div>
+      <div class="bar" aria-label="Fortschritt"><div id="barFill"></div></div>
+      <div class="footer">
+        <div>Tipps: <span class="kbd">Enter</span> = prüfen · <span class="kbd">Shift</span>+<span class="kbd">Enter</span> = Zeilenumbruch (Freitext)</div>
+        <div id="scoreLine">Richtig: 0 · Versuche gesamt: 0</div>
+      </div>
+    </div>
+
+    <div class="content" id="main">
+      
+      <div id="qArea"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true">
+  <div class="toast">
+    <div class="toastTop">
+      <div class="badge" id="toastBadge">—</div>
+      <div class="toastSmall" id="toastMeta">—</div>
+    </div>
+    <div class="toastText" id="toastText"></div>
+    <div id="toastExtra"></div>
+    <div class="toastTop" style="justify-content:flex-end; gap:10px;">
+      <button id="btnNext" class="btnPrimary" style="display:none;">Weiter</button>
+      <button id="btnClose">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* =========================
+   CHANGE 2026-01-04 (REV F)
+   FIX: Quiz must work even when localStorage is blocked (e.g., embedded/iframe, strict tracking prevention).
+   - Wrap all storage access in try/catch
+   - Fallback to in-memory store
+   ========================= */
+
+const __memStore = {};
+function storageGet(key){
+  try { return storageGet(key); } catch(e){ return __memStore[key] ?? null; }
+}
+function storageSet(key, value){
+  try { storageSet(key, value); } catch(e){ __memStore[key] = value; }
+}
+function storageRemove(key){
+  try { storageRemove(key); } catch(e){ delete __memStore[key]; }
+}
+
+
+/* =========================
+   DATEN (50 Fragen)
+   ========================= */
+const QUESTIONS = [{"id": 1, "type": "mc", "prompt": "Warum bezeichnet Frl. Doktor von Zahnd die beiden ersten Taten (Dorothea Moser / Irene Straub) gegenüber Voß als medizinisch beunruhigend – und nennt schließlich eine mögliche gemeinsame Ursache?", "options": ["Weil beide Opfer Angehörige der von-Zahnd-Familie sind und sie Erbkrankheiten vermutet.", "Weil beide Täter Kernphysiker sind und sie eine Veränderung des Gehirns durch Radioaktivität in Betracht zieht.", "Weil beide Täter aus demselben Land stammen und sie politische Motive vermutet.", "Weil beide Opfer jeweils beim Flötenspiel starben und sie akustische Halluzinationen vermutet."], "answer": 1, "hint": "Achte darauf, welche Gemeinsamkeit Voß zunächst nur als Zufall sieht – und welche Hypothese Zahnd dann vorsichtig formuliert.", "model": "Frl. Doktor stellt fest, dass Newton und Einstein Kernphysiker sind, radioaktive Stoffe untersuchten, und zieht (vorsichtig) die Möglichkeit einer Gehirnveränderung durch Radioaktivität in Betracht."}, {"id": 2, "type": "mc", "prompt": "Welches Detail markiert im 1. Akt besonders deutlich die 'satyrspielartige' Komik im Umgang mit dem zweiten Mordfall?", "options": ["Die Polizei trinkt Weißwein und riecht danach, während sie routiniert misst und protokolliert.", "Voß findet sofort den Täter, weil die Villa videoüberwacht ist.", "Die Oberschwester zwingt Voß, mit Möbius Blockflöte zu spielen.", "Der Gerichtsmediziner weigert sich, die Todesursache zu nennen."], "answer": 0, "hint": "Kontrast: 'tragische Leiche' vs. 'gemütliche Routine' – welches Bild wird gleich am Anfang gesetzt?", "model": "Der Text stellt die Leiche im Hintergrund und zugleich seelenruhige Beamte (nach Weißwein riechend) beim routinierten Vermessen/Protokollieren dar – grotesk-komischer Kontrast."}, {"id": 3, "type": "mc", "prompt": "Welche Kombination stimmt für die drei Morde und die verwendeten 'Werkzeuge'?", "options": ["Dorothea: Vorhangkordel – Irene: Lampenschnur – Monika: Vorhangkordel", "Dorothea: Lampenschnur – Irene: Vorhangkordel – Monika: Geigenbogenhaar", "Dorothea: Krawatte von Voß – Irene: Lampenschnur – Monika: Tischbein", "Dorothea: Lampenschnur – Irene: Lampenschnur – Monika: Lampenschnur"], "answer": 0, "hint": "Zwei Stränge werden explizit genannt: 'Schnur der Stehlampe' und 'Vorhangkordel'. Ordne korrekt zu.", "model": "Irene Straub wird mit der Schnur der Stehlampe erdrosselt; Dorothea Moser mit der Vorhangkordel; Monika Stettler im 2. Akt wiederum mit der Vorhangkordel (wie Dorothea)."}, {"id": 4, "type": "mc", "prompt": "Was ist die eigentliche Funktion von Möbius’ 'Salomo'-Inszenierung im 1. Akt?", "options": ["Er will die Familie religiös bekehren und Missionar Rose überzeugen.", "Er will als Verrückter gelten, um seine Erkenntnisse zu verstecken und die Außenwelt (auch seine Familie) von sich fernzuhalten.", "Er will Newton und Einstein provozieren, damit sie sich gegenseitig erschießen.", "Er will Frl. Doktor von Zahnd beeindrucken, um freigelassen zu werden."], "answer": 1, "hint": "Denke an Möbius’ Gespräch mit Schwester Monika direkt nach dem Familienauftritt: 'Ich spielte den Wahnsinnigen …'", "model": "Möbius spielt den Wahnsinnigen (Salomo-Erscheinungen), um seine Entdeckungen geheimzuhalten und zugleich einen endgültigen Abschied von der Familie zu erzwingen: Sie soll ihn 'mit gutem Gewissen vergessen'."}, {"id": 5, "type": "mc", "prompt": "Welche Enthüllung verändert im 2. Akt die Deutung von Newton und Einstein grundlegend?", "options": ["Sie sind echte historische Persönlichkeiten, die unsterblich sind.", "Sie sind Geheimdienstagenten, die sich als Newton/Einstein ausgeben, um an Möbius’ Wissen zu kommen.", "Sie sind Ärzte, die sich als Patienten tarnen, um Zahnd zu überwachen.", "Sie sind Schauspieler, die im Sanatorium eine Therapieaufführung proben."], "answer": 1, "hint": "Achte auf die Decknamen (Kilton / Eisler) und die Rede über Generalstäbe/Geheimdienste.", "model": "Newton und Einstein sind nicht bloß Wahnkranke, sondern Agenten gegnerischer Geheimdienste (Kilton/Eisler), die Möbius’ Forschung für ihr System sichern wollen."}, {"id": 6, "type": "mc", "prompt": "Warum lässt Möbius seine Manuskripte verbrennen – und was ist daran dramaturgisch der entscheidende Punkt?", "options": ["Aus Eifersucht auf Newton/Einstein; entscheidend ist, dass Zahnd die Asche analysiert.", "Um sicherzugehen, dass niemand seine Ergebnisse nutzen kann; entscheidend ist, dass Zahnd sie längst kopiert hat.", "Weil er seine Theorien für falsch hält; entscheidend ist, dass Voß ihm nicht glaubt.", "Weil Feuer im Sanatorium verboten ist; entscheidend ist, dass die Oberschwester ihn bestraft."], "answer": 1, "hint": "Schlüssel: 'Es war sinnlos, Manuskripte zu verbrennen, die ich schon besitze.'", "model": "Möbius verbrennt die Manuskripte, um die Welt zu schützen – aber Zahnd hat sie jahrelang photokopiert; die Vernichtung kommt zu spät (Paradox/Schlimmstwendung)."}, {"id": 7, "type": "mc", "prompt": "Was zeigt der Schluss, wenn McArthur und Murillo plötzlich in schwarzer Uniform mit Pistolen auftreten?", "options": ["Die Polizei übernimmt dauerhaft die Villa, weil der Staatsanwalt es verlangt.", "Die Villa wird militärisch zum Geheimlabor umgebaut; die Pfleger sind Werkpolizei des Zahnd-Trusts.", "Die Patienten werden entlassen, weil sie ungefährlich sind.", "Der Missionar richtet eine Kapelle ein und übernimmt die Leitung."], "answer": 1, "hint": "Frage dich: Wer nennt Zahnd im 2. Akt 'Boss' – und wessen 'Verwaltungsrat' wartet?", "model": "Die Pfleger (McArthur/Murillo) und Sievers agieren als Werkpolizei eines Trusts: Das Sanatorium ist Teil von Zahnds Weltunternehmen und wird militärisch abgeschirmt."}, {"id": 8, "type": "mc", "prompt": "Welche Aussage fasst Möbius’ zentrale 'Ethik-These' im Stück am treffendsten zusammen?", "options": ["Wissenschaft ist nur dann frei, wenn sie keiner Politik dient.", "Was einmal gedacht wurde, kann nicht mehr zurückgenommen werden – deshalb muss Wissen politisch/gesellschaftlich verantwortet werden.", "Nur religiöse Menschen dürfen forschen, weil sie Gott fürchten.", "Geisteskrankheit ist die Voraussetzung für Genialität."], "answer": 1, "hint": "Die Formulierung steht wörtlich nahe am Ende – und markiert den Punkt, an dem es kein Zurück gibt.", "model": "Möbius’ Leitgedanke: Gedachtes ist nicht ungeschehen zu machen; Erkenntnis hat irreversible Folgen und verlangt Verantwortung über individuelle Moral hinaus."}, {"id": 9, "type": "mc", "prompt": "In den '21 Punkten' heißt es sinngemäß: Eine Geschichte ist zu Ende gedacht, wenn sie …", "options": ["… moralisch gelöst wurde, bevor Gewalt entsteht.", "… ihre schlimmstmögliche Wendung genommen hat.", "… die Hauptfigur ihre Unschuld beweist.", "… der Zufall ausgeschaltet ist."], "answer": 1, "hint": "Sieh auf Punkt 3 der '21 Punkte'.", "model": "Dürrenmatt formuliert: 'Eine Geschichte ist dann zu Ende gedacht, wenn sie ihre schlimmstmögliche Wendung genommen hat.'"}, {"id": 10, "type": "mc", "prompt": "Welche Konstellation beschreibt im 2. Akt am genauesten die 'Paradox-Falle' der drei Physiker?", "options": ["Sie sind frei, weil sie nur so tun, als wären sie verrückt.", "Sie sind gefangen, weil sie sich ins Irrenhaus flüchteten – und Zahnd macht das Irrenhaus zur Schatzkammer ihres Trusts.", "Sie sind gerettet, weil die Polizei sie schützt.", "Sie sind mächtig, weil sie die Manuskripte behalten."], "answer": 1, "hint": "Zahnd sagt ausdrücklich, worin die 'Bannkraft' besteht: nicht Mauern, sondern Struktur/Macht.", "model": "Sie wollten durch 'Verrücktheit' / Rückzug die Welt schützen – aber genau dieser Rückzug wird von Zahnd instrumentalisiert: Das Sanatorium wird zur Trust-Schatzkammer und damit zu ihrem Gefängnis."}, {"id": 11, "type": "text", "prompt": "Analysiere die Funktion der drei Morde als dramaturgisches Mittel: Was leisten sie für Komik, Spannung und ethische Zuspitzung – und warum sind sie mehr als bloße 'Schockeffekte'?", "hint": "Denke: Wiederholung (dreimal) + Variation (Werkzeug/Opfer/Täter) + Perspektivwechsel (Polizei, Publikum, Zahnd).", "model": "Die Morde sind wiederholte, variierte Knotenpunkte: Sie setzen den grotesk-komischen Kontrast (routinierte Polizei vs. Leiche) und steigern zugleich die Bedrohung. Sie zwingen jede Figur zur Positionierung (Staatsanwalt/Voß, Zahnd, Schwestern, Physiker) und dienen als ethische 'Kostenrechnung' der jeweiligen Strategie. Im 2. Akt werden sie außerdem umgedeutet: Die Morde sind Teil der Mechanik, die die Physiker endgültig kompromittiert und damit politisch/ökonomisch verfügbar macht.", "keywords": ["mord", "erdross", "grotesk", "wiederhol", "ethik", "strategie", "komik", "spannung", "kosten", "umdeut"], "minMatch": 3}, {"id": 12, "type": "text", "prompt": "Warum ist Voß als Kriminalinspektor mehr als nur 'Ermittler'? Zeige, wie seine Perspektive die Grenzlinie zwischen Normalität und Wahnsinn im Stück verschiebt.", "hint": "Achte auf Voß’ wiederholtes 'Bin ich eigentlich verrückt?' und seine Ohnmacht gegenüber den Regeln des Sanatoriums.", "model": "Voß verkörpert den 'normalen' Rechtsstaat, der in die Logik des Irrenhauses gerät: Er will vernehmen, protokollieren, Verantwortlichkeiten klären – aber die Institution (ärztliche Autorität, Therapiezwang) entzieht ihm das. Seine Verwirrung zeigt: Normalität ist nicht stabil; sie wird zur Rolle. Indem Voß schließlich resigniert (im 2. Akt: 'Ich denke nicht daran', Möbius zu besichtigen), markiert er den Rückzug des Rechts in die bloße Verwaltung des Faktischen.", "keywords": ["voß", "polizei", "normal", "verrückt", "protokoll", "autorität", "ohnmacht", "resign", "recht"], "minMatch": 3}, {"id": 13, "type": "text", "prompt": "Vergleiche Newtons 'Ordnungsrede' (Ordnungsliebe, Naturordnung) mit Möbius’ späterem Anspruch, 'wissenschaftlich vorzugehen' (logische Schlüsse). Welche Ironie entsteht daraus?", "hint": "Kontrast: Ordnung als Selbstbild vs. reale Unordnung (Mord, Macht, Manipulation).", "model": "Newton stilisiert Physik als Ordnungskunst (Unordnung in höhere Ordnung überführen). Möbius fordert später 'logisches' Entscheiden, um Denkfehler zu vermeiden. Die Ironie: Gerade ihre Planmäßigkeit/Logik führt in die schlimmstmögliche Wendung (Paradox). Ordnung/Logik reichen nicht, weil Machtstrukturen (Geheimdienste, Trust) und Zufall/Manipulation (Zahnd) die 'reine' Rationalität überrollen.", "keywords": ["ordnung", "logisch", "iron", "plan", "paradox", "macht", "zufall", "rational"], "minMatch": 3}, {"id": 14, "type": "text", "prompt": "Interpretationsfrage: Warum spielt Musik (Geige, Blockflöte, Beethoven/Kreisler) eine so zentrale Rolle – dramaturgisch und symbolisch?", "hint": "Denke an: Musik als Beruhigung/Maskierung, als 'Kultur' vs. Gewalt, als Steuerungsinstrument.", "model": "Musik dient als therapeutisches Alibi (Einstein 'muss geigen'), als Maskierung (kultivierte Oberfläche) und als Rhythmusgeber der Szenen. Symbolisch kollidiert 'Kultur' mit Gewalt: Die hohe Kunst (Beethoven) begleitet Mord/Polizeiarbeit. Zudem entlarvt die Musik die Rollen: Einstein lernt Geigen als Folter, Newton Schach – die Inszenierungen werden trainierte Masken.", "keywords": ["musik", "geige", "beethoven", "kreisler", "blockflöte", "beruhig", "maske", "kultur", "gewalt"], "minMatch": 3}, {"id": 15, "type": "text", "prompt": "Erkläre Möbius’ 'humanes' Argument für seinen Ausbruch gegenüber der Familie: Warum nennt er sein groteskes Verhalten 'human'?", "hint": "Achte auf seine Begründung: Vergangenheit auslöschen, Familie soll ihn vergessen können.", "model": "Möbius nennt es 'human', weil er die Familie vor weiterer Bindung/Belastung schützt: Indem er sich maximal abstoßend/gefährlich zeigt, ermöglicht er ihnen, ihn moralisch zu verlassen. 'Human' ist hier paradox: Er verletzt Gefühle brutal, um (aus seiner Sicht) langfristig Leben außerhalb der Anstalt zu retten und die Welt vor Wissen zu schützen.", "keywords": ["human", "familie", "vergessen", "abschied", "paradox", "belast"], "minMatch": 2}, {"id": 16, "type": "text", "prompt": "Welche Rolle spielt Frl. Doktor von Zahnd als Institution und als Figur? Unterscheide: (a) Ärztliche Autorität im 1. Akt, (b) Machtunternehmerin im 2. Akt.", "hint": "Achte auf Übergänge: vom 'Menschenfreund/Psychiater' zum Trust/ Werkpolizei / Verwaltungsrat.", "model": "(a) Im 1. Akt kontrolliert Zahnd die Definition von Krankheit ('Für wen sich meine Patienten halten, bestimme ich'), setzt Therapiezwänge (Begleitung am Klavier) und relativiert Schuld. (b) Im 2. Akt kippt die Rolle: Sie ist nicht mehr nur Deuterin, sondern Besitzerin/Lenkerin von Wissen und Gewalt. Das Sanatorium wird zur 'Schatzkammer meines Trusts', die Pfleger zur Werkpolizei, und medizinische Macht wird zu ökonomisch-politischer Weltherrschaft.", "keywords": ["zahnd", "ärzt", "autorität", "bestimme", "trust", "werkpolizei", "verwaltungsrat", "macht"], "minMatch": 3}, {"id": 17, "type": "text", "prompt": "Zeige, wie das Stück die Begriffe 'Wahnsinn' und 'Vernunft' gegeneinander verschiebt. Nenne mindestens zwei Stellen/Mechanismen, die diese Umwertung leisten.", "hint": "Denke: Möbius spielt Wahnsinn planmäßig; Zahnd wirkt rational, ist aber wahnhafter; Voß wird verunsichert.", "model": "Wahnsinn wird zur Strategie (Möbius spielt ihn bewusst; Agenten spielen ihn beruflich). Vernunft wird fragwürdig, weil sie in Macht umschlägt (Zahnd argumentiert 'behutsam', 'Kapital', 'Trust' – und ist zugleich wahnhaft-visionär). Außerdem wird 'Normalität' destabilisiert (Voß’ Verwirrung; Regeln, wer rauchen darf).", "keywords": ["wahnsinn", "vernunft", "strategie", "umwertung", "agent", "zahnd", "voß", "normal"], "minMatch": 3}, {"id": 18, "type": "text", "prompt": "Warum ist Möbius’ Satz 'Mut ist in meinem Falle ein Verbrechen' ein Schlüssel? Entfalte, was für ein 'Verbrechensbegriff' hier entsteht.", "hint": "Mut würde bedeuten: Öffentlichkeit, Anerkennung, Durchsetzung – und damit gesellschaftliche Folgen der Erkenntnisse.", "model": "Der Satz verschiebt 'Verbrechen' vom individuellen Delikt zur Verantwortungsethik: Für Möbius wäre es ein moralisches Verbrechen, seine Erkenntnisse öffentlich zu machen, weil sie Machtmittel erzeugen und Missbrauch wahrscheinlich ist. 'Mut' (gegen Spott/Institutionen) wäre zugleich der Schritt, der die Welt gefährdet – also ethisch kriminell.", "keywords": ["mut", "verbrechen", "öffentlichkeit", "verantwort", "machtmittel", "missbrauch"], "minMatch": 3}, {"id": 19, "type": "text", "prompt": "Inwiefern sind Newton und Einstein Spiegelbilder zweier politischer Systeme – und warum macht das Stück beide Positionen problematisch?", "hint": "Achte auf: Freiheit der Wissenschaft vs. Verpflichtung an Machtpolitik; beide wollen Möbius’ Wissen.", "model": "Newton (Kilton) verteidigt Freiheit/Ästhetik der Wissenschaft und lehnt Verantwortung ab; Einstein (Eisler) will Wissenschaft im Dienst eines Systems verpflichten. Problematisch werden beide, weil beide die gleiche instrumentelle Logik teilen: Sie wollen Resultate und sind bereit zu töten/zu erpressen. Die Ideologie ändert die Begründung, nicht die Gewaltstruktur.", "keywords": ["spiegel", "system", "freiheit", "verantwort", "machtpolitik", "instrument", "gewalt", "geheimdienst"], "minMatch": 3}, {"id": 20, "type": "text", "prompt": "Warum ist das Verbrennen der Manuskripte zugleich 'logisch' und 'sinnlos'? Begründe beides textnah.", "hint": "Logisch: Konsequenz aus Verantwortungsethik. Sinnlos: Zahnd hat kopiert / Wissen ist denkbar.", "model": "Logisch: Möbius will irreversible Gefährdung verhindern und zieht die radikalste Konsequenz. Sinnlos: Zahnd besitzt Kopien; zudem gilt der Gedanke: Alles Denkbare wird irgendwann gedacht – die Vernichtung einzelner Blätter stoppt das Denkbare nicht.", "keywords": ["logisch", "sinnlos", "verbrenn", "kopier", "denkbar", "zurückgenommen"], "minMatch": 3}, {"id": 21, "type": "text", "prompt": "Erkläre, warum die Einheit von Raum, Zeit und Handlung im Stück (Salon, kurzer Zeitraum, wenige Figuren) nicht nur klassizistische Spielerei ist, sondern die Aussage zuspitzt.", "hint": "Die Enge macht aus der Villa ein Modell der Welt: Labor/Versuchsanordnung.", "model": "Die strenge Einheit wirkt wie ein Experiment: Ein geschlossener Raum (Salon) wird zum Modell einer Welt, in der Wissen, Macht und Moral aufeinanderprallen. Dadurch wird jede Ausweichbewegung unmöglich: Die Figuren müssen die Konsequenzen im selben Raum austragen, und die Zuspitzung auf 'Auswirkung' (nicht Physikinhalte) wird fokussiert.", "keywords": ["einheit", "raum", "zeit", "handlung", "modell", "labor", "enge", "konsequenz"], "minMatch": 3}, {"id": 22, "type": "text", "prompt": "Analysiere die Rolle der Oberschwester Marta Boll: Inwiefern ist sie zugleich Ordnungsmacht und Komplizin der Groteske?", "hint": "Achte auf ihren Ton, ihre Regeln, ihr Umgang mit Voß.", "model": "Sie ist Hausordnung und Verwaltungskörper: sie organisiert, kontrolliert, setzt Regeln und behauptet Professionalität. Gleichzeitig erzeugt sie Groteske, weil ihre 'Normalitätslogik' absurd wirkt (Täter muss geigen; Regeln werden wie Naturgesetze behandelt).", "keywords": ["oberschwester", "ordnung", "regel", "grotesk", "komplice", "voß"], "minMatch": 3}, {"id": 23, "type": "text", "prompt": "Warum ist die Szene mit Frau Rose/Missionar Rose und den Buben dramaturgisch so lang und detailreich? Welche Funktion hat diese 'bürgerliche' Welt im Stück?", "hint": "Kontrastfolie zur abstrakten Physik; moralischer Druck; soziale Kosten.", "model": "Die Familienszene stellt eine konkrete Außenwelt her (Armut, Kinder, Berufung, Auswanderung), die gegen abstrakte Physik gesetzt wird. Sie erzeugt moralischen Druck (Vaterrolle, Schuld) und macht soziale Kosten sichtbar. Zugleich wird Bürgerlichkeit grotesk gebrochen (Psalm, Blockflöte, Ausbruch).", "keywords": ["familie", "rose", "buben", "bürgerlich", "außenwelt", "kontrast", "kosten", "schuld"], "minMatch": 3}, {"id": 24, "type": "text", "prompt": "Erläutere die Bedeutung der Stiftungen/Finanzierungsrede ('Geld liegt wie Heu herum') im 1. Akt. Wie verbindet der Text Ökonomie, Moral und Institution?", "hint": "Achte auf Zahnd als Ärztin und zugleich als Managerin/Erbin.", "model": "Die Rede zeigt das Sanatorium als Teil eines Geldsystems: Krankheit, Elite, Stiftungen. Moral ('Pflicht als Ärztin') wird ökonomisch gerahmt. Zugleich wird Zahnds Position als Erbin/Lenkerin vorbereitet: Aus Kapital und Institution entsteht später der Trust.", "keywords": ["stiftung", "geld", "ökonomie", "institution", "trust", "erbe", "moral"], "minMatch": 3}, {"id": 25, "type": "text", "prompt": "Warum ist Möbius’ Fluchtplan mit Monika (Heirat, Gemeindeschwester, Zug 8:20) ein dramaturgischer Trick? Was kippt dadurch in der Wahrnehmung?", "hint": "Es wirkt wie Lösung/Happy-End – bis zum Mord.", "model": "Der Plan inszeniert eine plausible Ausstiegserzählung: Liebe, Alltag, Dorf. Dadurch entsteht Erwartung auf Lösung. Der Mord an Monika zerstört diese Hoffnung abrupt und realisiert die schlimmstmögliche Wendung im Moment maximaler Hoffnung.", "keywords": ["zug", "8:20", "hoffnung", "lösung", "happy", "mord", "wendung"], "minMatch": 3}, {"id": 26, "type": "text", "prompt": "Interpretationsfrage: Warum nennt Einstein weibliche Aufopferung 'unsinnig' – und wie spiegelt das seine eigene Schuld?", "hint": "Projektion/Entlastung: Mission vs. Gefühl; Irene stirbt.", "model": "Einstein versucht, eigene Verantwortung zu entlasten: Er profitiert von Hingabe und muss zugleich töten. Indem er Aufopferung als irrational abwertet, verschiebt er Schuld – und verrät die instrumentelle Logik seiner Mission.", "keywords": ["einstein", "unsinnig", "aufopfer", "schuld", "projektion", "hingabe", "mission"], "minMatch": 3}, {"id": 27, "type": "text", "prompt": "Zeige konkret, wie Punkt 8 der 21 Punkte ('Je planmäßiger..., desto wirksamer...') im Stück erzählt wird.", "hint": "Plan: Agenten + Möbius’ Rückzug. Treffer: Zahnd/Trust/Kopien.", "model": "Geheimdienste planen Infiltration; Möbius plant Rückzug und Geheimhaltung. Gerade diese Planmäßigkeit ermöglicht Zahnds Coup: Kopien, Trust, Werkpolizei. Der Zufall/ das Unkalkulierbare trifft sie, indem sie das Gegenteil ihres Ziels erreichen.", "keywords": ["plan", "zufall", "punkte", "21", "geheimdienst", "rückzug", "trust", "kopier", "gegenteil"], "minMatch": 3}, {"id": 28, "type": "text", "prompt": "Was bedeutet Zahnds Satz: 'Was euch in Bann hält, sind keine Irrenwärter'? Erkläre die Machtform.", "hint": "Strukturmacht: Institution, Diagnose, Ökonomie, bewaffnete Kontrolle.", "model": "Zahnd zeigt Strukturmacht: Nicht einzelne Wächter, sondern Organisation, Diagnosehoheit und ökonomische Gewalt (Trust/Werkpolizei) halten sie fest. Ihre Biografie als 'Verrückte' und ihre Morde sind Kontrollmittel.", "keywords": ["bann", "struktur", "macht", "diagnose", "trust", "werkpolizei", "kontrolle"], "minMatch": 3}, {"id": 29, "type": "text", "prompt": "Deute das direkte Sprechen ans Publikum im Schluss (Selbstvorstellungen). Was bewirkt es?", "hint": "Illusionsbruch, Ironie, Paradox, Autoritätsmarker vs. Ohnmacht.", "model": "Es bricht Illusion, verstärkt Paradox: Wissenschaftliche Autoritätsmarker stehen neben totaler Ohnmacht. Die Figuren demonstrieren ihre Rollen als Masken und zugleich als Wahrheitseffekte.", "keywords": ["publikum", "vorstellen", "bruch", "paradox", "iron", "autorität", "ohnmacht"], "minMatch": 3}, {"id": 30, "type": "text", "prompt": "Warum ist der Untertitel 'Komödie' zentral? Argumentiere mit Groteske/Paradox.", "hint": "Komik als Distanz und Zuspitzung: Routine + Schrecken; Paradox als Wirklichkeit.", "model": "Komödie heißt hier: groteske Zuspitzung, in der Schrecken in Routine, Höflichkeit und Bürokratie erscheint. Das Paradox wird sichtbar und zwingt zur Wirklichkeitsbegegnung (21 Punkte).", "keywords": ["komödie", "grotesk", "paradox", "routine", "bürokratie", "wirklichkeit", "punkte"], "minMatch": 3}, {"id": 31, "type": "text", "prompt": "Erläutere, warum 'Alles Denkbare wird einmal gedacht' die Lage verschärft statt entlastet.", "hint": "Einzelne können nicht stoppen; kollektive Verantwortung; Scheitern des Einzelnen.", "model": "Wenn Denkbares ohnehin gedacht wird, ist individuelle Geheimhaltung keine endgültige Lösung. Das verschärft die Verantwortung: Es braucht kollektive, politische Strukturen; Einzelstrategien müssen scheitern.", "keywords": ["denkbar", "einmal", "gedacht", "verschärf", "kollektiv", "politisch", "scheit"], "minMatch": 3}, {"id": 32, "type": "text", "prompt": "Deute die Techniker-Metapher (Formeln/Maschinen/Atombombe). Welche Kritik an Wissenschaft/Technik wird formuliert?", "hint": "Entkopplung von Erkenntnis und Anwendung; Missbrauch; Verantwortungskette reißt.", "model": "Die Metapher kritisiert die Entkopplung: Formeln werden ausgebeutet, Maschinen funktionieren ohne Verständnis, Machtmittel werden allgemein verfügbar. Verantwortung wird dadurch unklar und Missbrauch wahrscheinlich.", "keywords": ["techniker", "formeln", "maschine", "ausbeut", "atombombe", "missbrauch", "verantwort"], "minMatch": 3}, {"id": 33, "type": "text", "prompt": "Warum sind Porträts/Abstammung (General Leonidas von Zahnd) dramaturgisch wichtig?", "hint": "Erbe/Machtbasis; Vorbereitung Trust; Familienwahn.", "model": "Sie markieren Zahnds Machtbasis (Erbe, Elite, Alleinerbin) und psychische Disposition. Damit wird der spätere Trust-Coup vorbereitet: Kapital + Institution + Wahn.", "keywords": ["porträt", "general", "erbe", "elite", "alleinerb", "trust", "machtbasis"], "minMatch": 3}, {"id": 34, "type": "text", "prompt": "Setze Möbius’ Verzicht in Beziehung zu Punkt 17/18 der 21 Punkte. Warum muss er scheitern?", "hint": "Einzelner vs. alle; Paradox der Einzelrettung; strukturelle Macht.", "model": "Möbius versucht als Einzelner zu lösen, was alle betrifft. Nach den 21 Punkten muss das scheitern: Strukturen und Interessen sind stärker als individuelle Moral; sein Rückzug produziert neue Machtkonstellationen.", "keywords": ["punkte", "21", "alle", "einzel", "scheitern", "rückzug", "struktur", "moral"], "minMatch": 3}, {"id": 35, "type": "text", "prompt": "Welche Funktion hat das Rauchen-Motiv für Machtverhältnisse und Komik?", "hint": "Regeln/Hierarchie; Autonomie; kleine Ohnmacht spiegelt große.", "model": "Rauchregeln markieren Hierarchie und Systemmacht. Das Alltagsverbot spiegelt die große Ohnmacht des Rechtsstaats in der Anstalt und erzeugt komische Reibung.", "keywords": ["rauchen", "verbot", "hierarchie", "komik", "ohnmacht", "system"], "minMatch": 3}, {"id": 36, "type": "text", "prompt": "Warum ist Zahnds Satz 'Für wen sich meine Patienten halten, bestimme ich' zentral?", "hint": "Deutungshoheit; Diagnose als Wahrheit; Glaubwürdigkeit wird entzogen.", "model": "Er behauptet epistemische Macht: Die Institution definiert Wahrheit/Identität. Wer als verrückt gilt, verliert Glaubwürdigkeit – später wird das zur politischen Waffe gegen Möbius.", "keywords": ["bestimme", "deutung", "diagnose", "wahrheit", "glaubwürdigkeit", "institution", "macht"], "minMatch": 3}, {"id": 37, "type": "text", "prompt": "Deute den Salomo-Psalm (radioaktive Erde, blauschimmernde Wüste). Welche Perspektive eröffnet er?", "hint": "Kosmische Perspektive + Fortschrittskritik; Vorahnung Katastrophe.", "model": "Er verbindet kosmische Weite mit radioaktivem Verfall: Fortschritt führt in Wüste/Leere. Das ist Vorahnung des Endes und moralische Entzauberung der Technik.", "keywords": ["psalm", "salomo", "radioaktiv", "wüste", "kosm", "fortschritt", "katastroph"], "minMatch": 3}, {"id": 38, "type": "text", "prompt": "Welche Pointe steckt in Zahnds Methode (betäuben, photokopieren) für die Frage 'Wer kontrolliert Wissen'?", "hint": "Kontrolle durch Zugriff/Prozesse/Organisation, nicht durch Genialität.", "model": "Kontrolle entsteht durch Zugriff und Prozesse (Betäubung, Kopie, Kapital), nicht durch größere Genialität. Wissen wird administrativ/ökonomisch enteignet.", "keywords": ["betäub", "photokop", "zugriff", "prozess", "organisation", "enteign", "kapital"], "minMatch": 3}, {"id": 39, "type": "text", "prompt": "Erkläre die Ironie: 'Ihr seid in euer eigenes Gefängnis geflüchtet.'", "hint": "Schutzraum wird Käfig; moralischer Rückzug ermöglicht Instrumentalisierung.", "model": "Der Rückzug sollte schützen, wird aber zur Selbstfesselung: Er schafft Bedingungen, unter denen Zahnd die volle Kontrolle übernehmen kann.", "keywords": ["eigen", "gefängnis", "schutz", "käfig", "rückzug", "instrument"], "minMatch": 3}, {"id": 40, "type": "text", "prompt": "Vergleiche die Legitimationen von Newton, Einstein und Möbius. Wo bricht jede?", "hint": "Freiheit ohne Verantwortung; Verantwortung als Machtpolitik; Verzicht scheitert an Strukturen/Denkbarkeit.", "model": "Newton: Freiheit der Wissenschaft → instrumentell/gewaltsam. Einstein: Verantwortung → an Systemmacht gebunden. Möbius: Verzicht → scheitert an Strukturen und dem Prinzip des Denkbaren (Zahnd/andere).", "keywords": ["legitimation", "freiheit", "verantwort", "machtpolitik", "verzicht", "struktur", "denkbar", "scheit"], "minMatch": 3}, {"id": 41, "type": "text", "prompt": "Warum ist Zahnds Weltraum-/Andromeda-Vision konsequent aus der Logik des Stücks – trotz Größenwahn?", "hint": "Kapital+Wissen→Expansionsimperativ; Satire; 'System aller Erfindungen'.", "model": "Wenn Wissen als Machtmittel im Trust gebündelt wird, folgt Expansion als Imperativ. Dürrenmatt überhöht satirisch, um die Logik von Kapital/Technologie sichtbar zu machen.", "keywords": ["andromeda", "vision", "trust", "system", "erfind", "expansion", "satire", "kapital"], "minMatch": 3}, {"id": 42, "type": "text", "prompt": "Warum beschließen die drei Physiker am Ende zu bleiben? Handlungsmacht oder Kapitulation? (ambivalent begründen)", "hint": "Kapitulation strukturell; Handlungsmacht minimal (Geheimnis bewahren).", "model": "Es ist Kapitulation, weil sie eingeschlossen und diskreditiert sind; aber auch minimale Handlungsmacht: Sie entscheiden sich gegen Mitarbeit für ein System und für die 'kleine Chance', das Geheimnis zu bewahren.", "keywords": ["bleiben", "kapitulation", "handlungsmacht", "chance", "geheimnis", "diskredit"], "minMatch": 3}, {"id": 43, "type": "text", "prompt": "Was sagt die höfliche Sprache (Bitte, Pardon, Havanna) über Zivilisation im Stück?", "hint": "Höflichkeit als dünne Schicht; Bürokratie normalisiert Gewalt.", "model": "Etikette begleitet Mord und Macht und normalisiert den Ausnahmezustand. Zivilisation erscheint als performative Schicht, die Gewalt integrieren kann.", "keywords": ["höflich", "bitte", "pardon", "havanna", "zivil", "schicht", "bürokratie", "gewalt"], "minMatch": 3}, {"id": 44, "type": "text", "prompt": "Warum ist der Staatsanwalt wichtig, obwohl er kaum auftritt?", "hint": "Symbol für Rechtsdruck; bleibt wirkungslos gegen Trust/Institution.", "model": "Er steht für den äußeren Rechtsanspruch, der Sicherheitsmaßnahmen fordert. Gleichzeitig zeigt seine Unsichtbarkeit/Resignation die Ohnmacht staatlicher Kontrolle gegenüber privater Strukturmacht.", "keywords": ["staatsanwalt", "recht", "druck", "sicherheit", "wirkungslos", "ohnmacht", "kontrolle"], "minMatch": 3}, {"id": 45, "type": "text", "prompt": "Inwiefern ist 'Les Cerisiers' ein Weltmodell? Nenne mind. drei Ebenen.", "hint": "Politik (Systemkonflikt), Ökonomie (Trust), Epistemik (Diagnose).", "model": "Politisch: Geheimdienste/Systemkonflikt im Mikroraum. Ökonomisch: Stiftungen/Erbe/Trust – Wissen als Ware/Macht. Epistemisch: Diagnose bestimmt Wahrheit und Glaubwürdigkeit. So wird die moderne Welt im Salon modelliert.", "keywords": ["weltmodell", "geheimdienst", "system", "ökonomie", "trust", "diagnose", "wahrheit", "ware"], "minMatch": 3}, {"id": 46, "type": "text", "prompt": "Deute: 'Die Rechnung ist aufgegangen. Nicht zugunsten der Welt, aber zugunsten einer alten, buckligen Jungfrau.'", "hint": "Zynische Bilanz; private Nutzenmaximierung; Scheitern der Rettungspläne.", "model": "Der Satz ist die zynische Bilanz: Alle Rettungsstrategien münden nicht in Gemeinwohl, sondern in private Machtakkumulation. Das zeigt den Triumph instrumenteller Kalküle über Ethik.", "keywords": ["rechnung", "aufgegangen", "nicht zugunsten", "bucklig", "zyn", "gemeinwohl", "macht"], "minMatch": 3}, {"id": 47, "type": "text", "prompt": "Warum ist die weiterklingende Geige am Ende bedeutungsvoll?", "hint": "Kreislauf der Masken; Unabgeschlossenheit; keine Erlösung.", "model": "Die Musik setzt einen Rest: Masken und Routine laufen weiter, obwohl alles entschieden ist. Das Ende ist formal – inhaltlich bleibt Bedrohung/Unabgeschlossenheit.", "keywords": ["geige", "rest", "kreislauf", "mask", "unabgeschlossen", "erlösung"], "minMatch": 3}, {"id": 48, "type": "text", "prompt": "Wähle einen Punkt aus den 21 Punkten und belege ihn an einer Szene (konkret).", "hint": "Du musst Punkt + Szene koppeln (z. B. Punkt 3 + Zahnd-Enthüllung).", "model": "Beispiel: Punkt 3 ('schlimmstmögliche Wendung') – Zahnd besitzt die Kopien; Möbius’ Moralstrategie wird instrumentalisiert. Oder Punkt 18 – der Einzelne scheitert sichtbar. Andere Zuordnungen sind möglich, wenn sie textnah begründet sind.", "keywords": ["punkt", "21", "szene", "beleg", "wendung", "scheitern", "textnah"], "minMatch": 3}, {"id": 49, "type": "text", "prompt": "Warum ist der Satz 'Ein Drama über die Physiker muß paradox sein' strukturell eingelöst?", "hint": "Paradox-Architektur: Schutz wird Gefahr; Verrücktheit rational; Freiheit Gefangenschaft.", "model": "Das Stück baut Paradox als Architektur: Verrücktheit ist Maske/Strategie; Schutzraum wird Gefängnis; Freiheit wird als Gefangenschaft erzählt; Verantwortung führt zu Mord und damit zur Diskreditierung.", "keywords": ["drama", "physiker", "paradox", "struktur", "schutz", "gefahr", "freiheit", "gefängnis", "maske"], "minMatch": 4}, {"id": 50, "type": "text", "prompt": "Formuliere in 4–6 Sätzen das Verhältnis von Erkenntnis, Verantwortung und Macht im Stück – mit zwei konkreten Textmomenten.", "hint": "Nutze z. B. Manuskriptverbrennung + Zahnd-Kopien / Geheimdienst-Decknamen / 'Was einmal gedacht wurde…'.", "model": "Das Stück zeigt: Erkenntnis erzeugt Machtmittel, die sich nicht privat kontrollieren lassen. Möbius’ Versuch, Verantwortung durch Rückzug und Manuskriptverbrennung zu übernehmen, scheitert, weil Zahnd seine Aufzeichnungen längst photokopiert und institutionelle Gewalt organisiert. Newton/Einstein demonstrieren die politische Instrumentalisierung (Agenten, Revolver, Forderung nach Manuskripten). Am Ende bleibt: Gedachtes ist irreversibel – und Macht findet Wege, es zu nutzen.", "keywords": ["erkenntnis", "verantwort", "macht", "verbrenn", "photokop", "geheimdienst", "irreversibel", "gedacht"], "minMatch": 4}];
+
+/* =========================
+   STATE / STORAGE
+   ========================= */
+const STORAGE_KEY = "physiker_quiz_state_v1";
+const SESSION_ID_KEY = "physiker_quiz_session_id_v1";
+
+const defaultState = () => ({
+  currentIndex: 0,
+  attemptsById: {},
+  correctById: {},
+  totalAttempts: 0,
+  correctCount: 0,
+  startedAt: null,
+});
+
+function loadState() {
+  try {
+    const raw = storageGet(STORAGE_KEY);
+    if(!raw) return defaultState();
+    const st = JSON.parse(raw);
+    if(typeof st.currentIndex !== "number") return defaultState();
+    return st;
+  } catch(e) { return defaultState(); }
+}
+
+function saveState() {
+  storageSet(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getSessionId() {
+  let sid = storageGet(SESSION_ID_KEY);
+  if(!sid) {
+    sid = "S-" + Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
+    storageSet(SESSION_ID_KEY, sid);
+  }
+  return sid;
+}
+
+let state = loadState();
+const sessionId = getSessionId();
+
+/* =========================
+   HELPERS
+   ========================= */
+const $ = (sel) => document.querySelector(sel);
+
+function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+
+function normalizeText(s) {
+  return (s || "")
+    .toLowerCase()
+    .normalize("NFD").replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function nowISO() { return new Date().toISOString(); }
+
+function qAttempts(qid) { return state.attemptsById[qid] || 0; }
+function setAttempts(qid, v) { state.attemptsById[qid] = v; }
+
+function markCorrect(qid) {
+  if(!state.correctById[qid]) {
+    state.correctById[qid] = true;
+    state.correctCount += 1;
+  }
+}
+
+function isCorrect(qid) { return !!state.correctById[qid]; }
+
+function progressPct() {
+  const done = Object.keys(state.correctById).length;
+  return Math.round((done / QUESTIONS.length) * 100);
+}
+
+function updateHeader() {
+  const idx = clamp(state.currentIndex, 0, QUESTIONS.length);
+  const done = Object.keys(state.correctById).length;
+  $("#progressText").textContent = `Frage ${Math.min(idx+1, QUESTIONS.length)} von ${QUESTIONS.length} · erledigt: ${done} · Fortschritt: ${progressPct()}%`;
+  $("#barFill").style.width = `${progressPct()}%`;
+  $("#scoreLine").textContent = `Richtig: ${state.correctCount} · Versuche gesamt: ${state.totalAttempts}`;
+  const started = state.startedAt ? `seit ${new Date(state.startedAt).toLocaleString()}` : "nicht gestartet";
+  $("#sessionPill").textContent = `Session: ${sessionId} · ${started}`;
+}
+
+function showOverlay({ ok, title, text, meta, extraHtml, showNext, autoNextMs }) {
+  const overlay = $("#overlay");
+  const badge = $("#toastBadge");
+  const toastText = $("#toastText");
+  const toastMeta = $("#toastMeta");
+  const extra = $("#toastExtra");
+  const btnNext = $("#btnNext");
+
+  badge.className = "badge " + (ok ? "good" : "bad");
+  badge.textContent = title;
+  toastText.textContent = text;
+  toastMeta.textContent = meta || "";
+  extra.innerHTML = extraHtml || "";
+  btnNext.style.display = showNext ? "inline-flex" : "none";
+
+  overlay.classList.add("show");
+
+  if(autoNextMs) {
+    window.__autoNextTimer && clearTimeout(window.__autoNextTimer);
+    window.__autoNextTimer = setTimeout(() => {
+      overlay.classList.remove("show");
+      goNext();
+    }, autoNextMs);
+  }
+}
+
+function closeOverlay() {
+  $("#overlay").classList.remove("show");
+  window.__autoNextTimer && clearTimeout(window.__autoNextTimer);
+}
+
+function goNext() {
+  let i = state.currentIndex + 1;
+  if(i >= QUESTIONS.length) state.currentIndex = QUESTIONS.length - 1;
+  else state.currentIndex = i;
+  saveState();
+  render();
+}
+
+function goToFirstUnanswered() {
+  for(let i=0; i<QUESTIONS.length; i++) {
+    if(!isCorrect(QUESTIONS[i].id)) {
+      state.currentIndex = i;
+      saveState();
+      return;
+    }
+  }
+  state.currentIndex = QUESTIONS.length - 1;
+  saveState();
+}
+
+function exportJSON() {
+  const payload = { sessionId, exportedAt: nowISO(), state, questionsCount: QUESTIONS.length };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "die-physiker-quiz-export.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function resetAll() {
+  if(!confirm("Wirklich alles zurücksetzen? (Fortschritt/Versuche werden gelöscht)")) return;
+  state = defaultState();
+  storageRemove(STORAGE_KEY);
+  render();
+}
+
+/* =========================
+   EVALUATION
+   ========================= */
+function evalMC(q, chosenIndex) { return chosenIndex === q.answer; }
+
+function evalText(q, userText) {
+  const norm = normalizeText(userText);
+  if(!norm) return { ok:false, hits:0, required:q.minMatch, matched:[] };
+  const matched = [];
+  const keys = q.keywords || [];
+  for(const k of keys) {
+    const kn = normalizeText(k);
+    if(!kn) continue;
+    const escaped = kn.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+    const pattern = new RegExp(`\\b${escaped}`);
+    if(pattern.test(norm)) matched.push(k);
+  }
+  const hits = matched.length;
+  const ok = hits >= (q.minMatch || 2);
+  return { ok, hits, required:(q.minMatch||2), matched };
+}
+
+/* =========================
+   RENDER
+   ========================= */
+function render() {
+  updateHeader();
+  const area = $("#qArea");
+  area.innerHTML = "";
+
+  const done = Object.keys(state.correctById).length;
+  if(done === QUESTIONS.length) {
+    const box = document.createElement("div");
+    box.className = "hintBox";
+    box.innerHTML = `
+      <div class="modelTitle">✅ Fertig</div>
+      <div>Du hast alle ${QUESTIONS.length} Fragen korrekt abgeschlossen.</div>
+      <div class="note" style="margin-top:8px;">Du kannst exportieren (JSON) oder resetten.</div>
+    `;
+    area.appendChild(box);
+    return;
+  }
+
+  if(isCorrect(QUESTIONS[state.currentIndex].id)) {
+    goToFirstUnanswered();
+  }
+
+  const q = QUESTIONS[state.currentIndex];
+  const attempts = qAttempts(q.id);
+
+  const meta = document.createElement("div");
+  meta.className = "qmeta";
+  meta.innerHTML = `
+    <div class="tag">${q.type === "mc" ? "Multiple Choice" : "Freitext"}</div>
+    <div class="attempts">Versuche bei dieser Frage: <b>${attempts}</b> / 3</div>
+  `;
+  area.appendChild(meta);
+
+  const prompt = document.createElement("div");
+  prompt.className = "prompt";
+  prompt.textContent = q.prompt;
+  area.appendChild(prompt);
+
+  const inputWrap = document.createElement("div");
+
+  if(q.type === "mc") {
+    const opts = document.createElement("div");
+    opts.className = "options";
+    q.options.forEach((optText, idx) => {
+      const row = document.createElement("label");
+      row.className = "opt";
+      row.innerHTML = `
+        <input type="radio" name="mc" value="${idx}" />
+        <div>${optText}</div>
+      `;
+      opts.appendChild(row);
+    });
+    inputWrap.appendChild(opts);
+  } else {
+    const ta = document.createElement("textarea");
+    ta.id = "textAnswer";
+    ta.placeholder = "Schreibe deine Antwort (textnah, argumentativ, präzise Begriffe).";
+    inputWrap.appendChild(ta);
+
+    const note = document.createElement("div");
+    note.className = "note";
+    note.innerHTML = `Automatische Prüfung über Schlüsselbegriffe: benötigt <b>${q.minMatch || 2}</b> Treffer aus einer Begriffsliste.`;
+    inputWrap.appendChild(note);
+  }
+
+  area.appendChild(inputWrap);
+
+  const hintArea = document.createElement("div");
+  hintArea.id = "hintArea";
+  area.appendChild(hintArea);
+
+  const modelArea = document.createElement("div");
+  modelArea.id = "modelArea";
+  area.appendChild(modelArea);
+
+  const action = document.createElement("div");
+  action.className = "actionRow";
+  action.innerHTML = `
+    <div class="leftActions">
+      <button id="btnCheck" class="btnPrimary">Antwort prüfen</button>
+      <button id="btnSkip">Überspringen</button>
+    </div>
+    <div class="rightActions">
+      <div class="note">Regel: richtig → „Richtig“ → nächste Frage. falsch 1× → „Falsch“. falsch 2× → „Falsch + Hinweis“. falsch 3× → Musterantwort → weiter.</div>
+    </div>
+  `;
+  area.appendChild(action);
+
+  $("#btnCheck").onclick = () => checkAnswer();
+  $("#btnSkip").onclick = () => {
+    state.currentIndex = clamp(state.currentIndex + 1, 0, QUESTIONS.length - 1);
+    saveState();
+    render();
+  };
+
+  document.onkeydown = (e) => {
+    if($("#overlay").classList.contains("show")) {
+      if(e.key === "Escape") closeOverlay();
+      return;
+    }
+    if(e.key === "Enter") {
+      const ta = $("#textAnswer");
+      if(ta && document.activeElement === ta && e.shiftKey) return;
+      e.preventDefault();
+      checkAnswer();
+    }
+  };
+}
+
+function checkAnswer() {
+  const q = QUESTIONS[state.currentIndex];
+  let ok = false;
+  let extra = "";
+
+  if(q.type === "mc") {
+    const chosen = document.querySelector("input[name='mc']:checked");
+    if(!chosen) {
+      showOverlay({
+        ok: false,
+        title: "Falsch",
+        text: "Bitte wähle zuerst eine Option aus.",
+        meta: `Frage ${state.currentIndex+1}/${QUESTIONS.length}`,
+        showNext: false
+      });
+      return;
+    }
+    ok = evalMC(q, Number(chosen.value));
+  } else {
+    const ta = $("#textAnswer");
+    const res = evalText(q, ta ? ta.value : "");
+    ok = res.ok;
+    extra = `<div class="toastSmall">Treffer: ${res.hits}/${res.required} (erkannt: ${res.matched.slice(0,8).join(", ")}${res.matched.length>8 ? " …" : ""})</div>`;
+  }
+
+  state.totalAttempts += 1;
+  const a = qAttempts(q.id) + 1;
+  setAttempts(q.id, a);
+
+  if(ok) {
+    markCorrect(q.id);
+    saveState();
+    showOverlay({
+      ok: true,
+      title: "Richtig",
+      text: "✅ Richtig. Weiter zur nächsten Frage …",
+      meta: `Frage ${state.currentIndex+1}/${QUESTIONS.length} · Versuch ${a}/3`,
+      extraHtml: extra,
+      showNext: false,
+      autoNextMs: 900
+    });
+    return;
+  }
+
+  if(a === 1) {
+    saveState();
+    showOverlay({
+      ok: false,
+      title: "Falsch",
+      text: "❌ Falsch. Versuch es nochmals.",
+      meta: `Frage ${state.currentIndex+1}/${QUESTIONS.length} · Versuch 1/3`,
+      extraHtml: extra,
+      showNext: false
+    });
+    return;
+  }
+
+  if(a === 2) {
+    const hintArea = $("#hintArea");
+    hintArea.innerHTML = `
+      <div class="hintBox">
+        <div class="hintTitle">⚠ Hinweis (2. Fehlversuch)</div>
+        <div>${q.hint}</div>
+      </div>
+    `;
+    saveState();
+    showOverlay({
+      ok: false,
+      title: "Falsch",
+      text: "❌ Falsch. Hinweis eingeblendet. Versuch es ein drittes Mal.",
+      meta: `Frage ${state.currentIndex+1}/${QUESTIONS.length} · Versuch 2/3`,
+      extraHtml: extra,
+      showNext: false
+    });
+    return;
+  }
+
+  const modelArea = $("#modelArea");
+  modelArea.innerHTML = `
+    <div class="modelBox">
+      <div class="modelTitle">🧩 Musterantwort (3. Fehlversuch)</div>
+      <div>${q.model}</div>
+    </div>
+  `;
+  saveState();
+  showOverlay({
+    ok: false,
+    title: "Falsch",
+    text: "❌ Dritter Fehlversuch. Musterantwort wird angezeigt. Weiter zur nächsten Frage …",
+    meta: `Frage ${state.currentIndex+1}/${QUESTIONS.length} · Versuch 3/3`,
+    extraHtml: extra + `<div class="divider"></div><div class="toastSmall"><b>Musterantwort:</b> ${q.model}</div>`,
+    showNext: false,
+    autoNextMs: 2500
+  });
+}
+
+/* =========================
+   INIT
+   ========================= */
+$("#btnStart").onclick = () => {
+  if(!state.startedAt) state.startedAt = new Date().toISOString();
+  goToFirstUnanswered();
+  saveState();
+  render();
+};
+
+$("#btnReset").onclick = resetAll;
+$("#btnExport").onclick = exportJSON;
+$("#btnClose").onclick = closeOverlay;
+$("#btnNext").onclick = () => { closeOverlay(); goNext(); };
+
+updateHeader();
+render();
+</script>
+</body>
+</html>
